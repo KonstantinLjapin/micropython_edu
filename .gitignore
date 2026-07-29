@@ -1,0 +1,12 @@
+/.env
+.idea
+/venv
+/.venv
+/src/__pycache__/
+__pycache__
+__pycache__.py
+/webhook_cert.pem
+/webhook_pkey.pem
+*.pem
+/debug.log
+*.log
