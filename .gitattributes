@@ -1,0 +1,20 @@
+# Автоматически определять текстовые файлы и нормализовать их
+* text=auto
+
+# Для всех Python-файлов явно задать LF
+*.py text eol=lf
+
+# Для остальных часто используемых форматов тоже можно задать LF
+*.md text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.json text eol=lf
+*.sh text eol=lf
+*.css text eol=lf
+*.js text eol=lf
+*.html text eol=lf
+
+# Бинарные файлы (изображения, архивы) оставить без преобразований
+*.png binary
+*.jpg binary
+*.zip binary

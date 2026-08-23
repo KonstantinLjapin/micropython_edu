@@ -7,6 +7,9 @@ __pycache__
 __pycache__.py
 /webhook_cert.pem
 /webhook_pkey.pem
+temp
+micropython-stubs
+repos
 *.pem
 /debug.log
 *.log
