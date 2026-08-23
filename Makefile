@@ -6,8 +6,10 @@ run:
 
 # Полная выгрузка проекта на устройство
 deploy:
+	mpremote connect $(PORT) cp -r lib/ :/
+	mpremote connect $(PORT) cp -r drivers/ :/
 	mpremote connect $(PORT) cp main.py :
-	mpremote connect $(PORT) cp -r lib/ :lib/
+	mpremote connect $(PORT) reset
 	@echo "✅ Проект успешно загружен!"
 
 # Перезагрузка устройства и вход в REPL
@@ -20,5 +22,5 @@ reset:
 
 # Очистка файловой системы устройства (ОСТОРОЖНО!)
 clean-device:
-	mpremote connect $(PORT) fs rm -r /lib
-	mpremote connect $(PORT) fs rm main.py
+	mpremote connect $(PORT) fs rm -r lib
+	mpremote connect $(PORT) fs rm -r drivers
