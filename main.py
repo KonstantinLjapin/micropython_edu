@@ -1,6 +1,6 @@
 from boot import pyb
 from drivers.sensor.AHT import get_temperature
-
+from drivers.sensor.mpu_6050 import get_accelerometer_test
 
 def led_loop_test():
     for i in range(1, 5):
@@ -19,6 +19,12 @@ def get_temperature_test():
         pyb.delay(1000)
         print("LED", i, "OFF")
         pyb.LED(i).off()
+        pyb.delay(1000)
+
+
+def get_accelerometer():
+    while True:
+        get_accelerometer_test(scl='Y9', sda='Y10')
         pyb.delay(1000)
 
 

@@ -1,5 +1,5 @@
 import utime
-from machine import Pin, I2C
+from machine import Pin, SoftI2C
 from micropython import const
 
 
@@ -94,7 +94,7 @@ class AHT20(AHT10):
 
 def get_temperature(scl, sda):
     # I2C for the Wemos D1 Mini with pybord
-    i2c = I2C(scl=Pin(scl), sda=Pin(sda))
+    i2c = SoftI2C(scl=Pin(scl), sda=Pin(sda))
 
     # Create the sensor object using I2C
     sensor = AHT10(i2c)
