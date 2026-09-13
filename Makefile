@@ -8,6 +8,7 @@ run:
 deploy:
 	mpremote connect $(PORT) cp -r lib/ :/
 	mpremote connect $(PORT) cp -r drivers/ :/
+	mpremote connect $(PORT) cp motor_control.py :
 	mpremote connect $(PORT) cp main.py :
 	mpremote connect $(PORT) reset
 	@echo "✅ Проект успешно загружен!"

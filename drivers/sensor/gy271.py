@@ -1,10 +1,8 @@
 from machine import SoftI2C, Pin
 from math import atan2, pi
 import struct, time
-
-from machine import SoftI2C, Pin
-from math import atan2, pi
-import struct, time
+import machine
+import pyb
 
 
 class Magnetometer:
@@ -38,23 +36,51 @@ class Magnetometer:
     """
 
     def __init__(self, scl, sda):
-        self.qmc5883p = SoftI2C(scl=Pin(scl), sda=Pin(sda), freq=400000)
+        # === ПУЛЕНЕПРОБИВАЕМЫЙ СБРОС ШИНЫ I2C ===
+        # 1. Забираем пины у предыдущего SoftI2C (переводим в режим GPIO)
+        scl_pin = Pin(scl, Pin.OUT)
+        sda_pin = Pin(sda, Pin.OUT)
+
+        # 2. Отпускаем линию данных (SDA в HIGH)
+        sda_pin.value(1)
+
+        # 3. Генерируем 9 тактов на SCL, чтобы сдвинуть застрявший байт
+        for _ in range(9):
+            scl_pin.value(1)
+            time.sleep_us(20)
+            scl_pin.value(0)
+            time.sleep_us(20)
+
+        # 4. Формируем условие STOP (сбрасывает внутренний FSM датчика)
+        # STOP = переход SDA из LOW в HIGH, пока SCL = HIGH
+        scl_pin.value(1)
+        time.sleep_us(10)
+        sda_pin.value(0)
+        time.sleep_us(10)
+        sda_pin.value(1)
+        time.sleep_us(10)
+
+        time.sleep_ms(50)  # Даем датчику время на полный сброс
+        # ==========================================
+
+        # 2. Инициализация SoftI2C
+        self.qmc5883p = SoftI2C(scl=Pin(scl), sda=Pin(sda), freq=50000)
         self.qmc5883p_address = 0x2C
 
+        # 3. Инициализация переменных (ОБЯЗАТЕЛЬНО ДО вызова _modulesetup)
         self.registers = {
-            "chipid": 0x00,
-            "x-axis data": 0x01,
-            "y-axis data": 0x03,
-            "z-axis data": 0x05,
-            "axis invert": 0x29,
-            "status": 0x09,
-            "control1": 0x0A,
-            "control2": 0x0B,
+            "chipid": 0x00, "x-axis data": 0x01, "y-axis data": 0x03,
+            "z-axis data": 0x05, "axis invert": 0x29, "status": 0x09,
+            "control1": 0x0A, "control2": 0x0B,
         }
-
         self.data = [0, 0, 0]
         self.softcal = [1.0, 1.0, 1.0]
         self.hardcal = [0.0, 0.0, 0.0]
+
+        # 4. Диагностика
+        devices = self.qmc5883p.scan()
+        if self.qmc5883p_address not in devices:
+            raise OSError(f"Compass not found. Scan: {[hex(d) for d in devices]}")
 
         time.sleep_us(250)
         self._modulesetup()
@@ -114,6 +140,7 @@ class Magnetometer:
         start_z = self.data[2]
 
         xcomplete, ycomplete, zcomplete = False, False, False
+        print(max_z,max_x,max_y)
 
         self._log("  >>> ВРАЩАЙТЕ УСТРОЙСТВО! Ожидаю полного оборота по каждой оси...")
 
@@ -131,7 +158,8 @@ class Magnetometer:
             if cy > max_y: max_y = cy
             if cz < min_z: min_z = cz
             if cz > max_z: max_z = cz
-
+            print(max_z, max_x, max_y)
+            time.sleep_ms(200)
             # Проверка завершения оборота: диапазон > 80% от ожидаемого И значение вернулось к старту
             if not xcomplete:
                 if (max_x - min_x) > 0.8 * 2 * fieldstrength and abs(cx - start_x) < 0.1:
